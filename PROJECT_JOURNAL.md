@@ -157,4 +157,90 @@ What happened? Include the exact validation command and outcome when applicable.
 
 ### Follow-up
 Anything still to do, verify, or ask?
+
+### Goal
+
+Create a GitHub repository for the dbt project.
+
+Why
+
+The PDF requires:
+
+Plain Text
+dbt Cloud
+↓
+GitHub Repository
+↓
+transform/ subdirectory
+
+dbt Cloud stores all:
+
+Plain Text
+models
+sources
+tests
+snapshots
+macros
+
+inside GitHub.
+
+Without a repo:
+
+Plain Text
+No version control
+No pull requests
+No dbt CI
+Result
+
+A private repository named:
+
+
+cartwell-dbt
+ 
+### Create transform folder
+
+Create:
+
+Plain Text
+transform/README.md
+
+Contents:
+
+Plain Text
+dbt project for the Cartwell data. Raw tables are in Snowflake (CARTWELL.RAW).
+
+Commit:
+
+Add transform folder
+Why transform?
+
+Remember this answer because managers often ask.
+
+Current:
+
+transform/
+
+Later:
+
+Plain Text
+cartwell-dbt
+├── transform/
+│ └── dbt models
+├── airflow/
+│ └── DAGs
+├── analysis/
+│ └── SQL investigations
+
+The PDF already hints Stage 7 will include:
+
+
+Airflow
+
+So:
+
+transform/
+
+keeps dbt isolated.
+
+
 ```
