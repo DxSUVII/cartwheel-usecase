@@ -1,0 +1,41 @@
+.terraform-docker/
+# dbt build output
+target/
+dbt_packages/
+logs/
+.user.yml
+
+# Secrets and local files
+*.p8
+*.pem
+.env
+*.key
+
+# Python
+__pycache__/
+.venv/
+# Secrets
+.env
+*.p8
+*.pem
+*.key
+
+# Terraform
+.terraform/
+.terraform-docker/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# Raw data
+raw/
+
+# Python
+__pycache__/
+.venv/
+
+# dbt
+target/
+dbt_packages/
+logs/
+.user.yml
