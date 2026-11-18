@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: cartwell
+    description: "Raw data loaded from S3 into Snowflake"
+    database: CARTWELL
+    schema: RAW
+    config:
+      loaded_at_field: _LOADED_AT
+      freshness:
+        warn_after: {count: 24, period: hour} #If no new data for 24 hours → Warning
+
+        error_after: {count: 48, period: hour} # If no data for 48 hours → Fail
+
+    tables:
+      - name: customers
+        description: "One row per customer, on the day they signed up"
+      - name: customer_updates
+        description: "One row per profile change as sent, duplicates included"
+      - name: products
+        description: "One row per product per load date"
+      - name: orders
+        description: "One row per order line"
+      - name: transactions
+        description: "One row per payment attempt or refund"
+      - name: price_changes
+        description: "One row per price change"
