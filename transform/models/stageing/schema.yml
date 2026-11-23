@@ -1,0 +1,150 @@
+version: 2
+
+models:
+
+  # One customer should only sign up once.
+  # customer_id is the business key, so it must exist and be unique.
+  - name: stg_cartwell__customers
+    description: "One row per customer, as they signed up, with the address flattened."
+
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+
+  # Updates are event records.
+  # Duplicates are intentionally kept because the API sometimes sends them twice.
+  - name: stg_cartwell__customer_updates
+    description: "One row per profile change as received, duplicates kept."
+
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+
+      - name: updated_at
+        data_tests:
+          - not_null
+
+      - name: customer_id
+        data_tests:
+          - relationships:
+              to: ref('stg_cartwell__customers')
+              field: customer_id
+
+  # Products feed arrives as a full daily snapshot.
+  # We keep only the latest version of each product in staging.
+  - name: stg_cartwell__products
+    description: "One row per product, from the latest load date only."
+
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+
+      - name: price
+        data_tests:
+          - is_positive
+
+  # Order header information.
+  # One row represents one order.
+  - name: stg_cartwell__orders
+    description: "One row per order (order-level columns only)."
+
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+
+  # Order detail information.
+  # One row represents one product line within an order.
+  - name: stg_cartwell__order_lines
+    description: "One row per order line item."
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - order_id
+            - line_number
+
+    columns:
+      - name: order_id
+        data_tests:
+          - relationships:
+              to: ref('stg_cartwell__orders')
+              field: order_id
+
+      - name: product_id
+        data_tests:
+          - relationships:
+              to: ref('stg_cartwell__products')
+              field: product_id
+
+      - name: quantity
+        data_tests:
+          - is_positive
+
+      - name: unit_price
+        data_tests:
+          - is_positive
+
+      - name: line_total
+        data_tests:
+          - is_positive
+
+  # One row per payment attempt or refund.
+  # Orders and transactions are NOT 1:1.
+  # One order can have failed payments, retries and refunds.
+  - name: stg_cartwell__transactions
+    description: "One row per payment attempt or refund."
+
+    columns:
+      - name: transaction_id
+        data_tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        data_tests:
+          - relationships:
+              to: ref('stg_cartwell__orders')
+              field: order_id
+
+      - name: type
+        data_tests:
+          - accepted_values:
+              values: ['PAYMENT', 'REFUND']
+
+      - name: method
+        data_tests:
+          - accepted_values:
+              values: ['UPI', 'CARD', 'NETBANKING', 'WALLET']
+
+      - name: status
+        data_tests:
+          - accepted_values:
+              values: ['SUCCESS', 'FAILED']
+
+  # Product price history.
+  # Products table only shows current snapshot.
+  # Historical pricing lives here.
+  - name: stg_cartwell__price_changes
+    description: "One row per price change event."
+
+    columns:
+      - name: product_id
+        data_tests:
+          - relationships:
+              to: ref('stg_cartwell__products')
+              field: product_id
+
+      - name: old_price
+        data_tests:
+          - is_positive
+
+      - name: new_price
+        data_tests:
+          - is_positive

@@ -1,0 +1,11 @@
+version: 2
+
+snapshots:
+  - name: snap_customers
+    description: "SCD Type 2 history of customers, built one day at a time from int_customers_as_of."
+    relation: ref('int_customers_as_of')
+    config:
+      schema: snapshots
+      unique_key: customer_id
+      strategy: timestamp
+      updated_at: updated_at
