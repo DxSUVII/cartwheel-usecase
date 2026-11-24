@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: int_customer_versions
+    description: "All versions of a customer, exact duplicates removed."
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - customer_id
+            - updated_at
+
+  - name: int_customers_current
+    description: "One row per customer, their latest version."
+
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null

@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: dim_customers_t1
+    description: "Type 1 Slowly Changing Dimension for customers. Overwrites history to keep only the latest state."
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_customers_t2
+    description: "SCD Type 2 customer dimension: one row per version of a customer."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - customer_id
+              - valid_from
+      - dbt_utils.equal_rowcount: # Does dim_customers_t2 have the same number of rows
+# as int_customer_versions?
+          arguments:
+            compare_model: ref('int_customer_versions')
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+      - name: valid_from
+        data_tests:
+          - not_null
+      - name: is_current
+        data_tests:
+          - not_null
+  - name: dim_products_t2
+    description: "SCD Type 2 product dimension. Tracks price history with no gaps or overlaps."
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - product_id
+              - valid_from
+    columns:
+      - name: product_id
+        data_tests:
+          - not_null
+      - name: valid_from
+        data_tests:
+          - not_null
+      - name: is_current
+        data_tests:
+          - not_null
+  - name: fct_order_lines
+    description: "Fact table for order lines, using point-in-time joins to capture historical city and price."
+    data_tests:
+      - dbt_utils.equal_rowcount:
+          arguments:
+            compare_model: ref('stg_cartwell__order_lines')
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+      - name: unit_price
+        data_tests:
+          - not_null
+
+  - name: fct_payments
+    description: "Fact table for payments and transactions, linked to orders."
+    columns:
+      - name: transaction_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_cartwell__orders')
+              field: order_id        
+
+
+# Your model only adds:
+
+#SQL
+#valid_from
+#valid_to
+#is_current
+
+#It shouldn't lose records.

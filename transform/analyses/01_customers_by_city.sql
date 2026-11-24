@@ -1,0 +1,6 @@
+SELECT 
+    RECORD:address:city::VARCHAR AS city, 
+    COUNT(*) AS customer_count
+FROM CARTWELL.RAW.CUSTOMERS
+GROUP BY 1
+ORDER BY 2 DESC;
