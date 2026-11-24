@@ -20,7 +20,8 @@ renamed as (
 
 select * from renamed
 -- The Snowflake Trick:
-qualify rank() over (partition by product_id order by _loaded_at desc) = 1
+qualify row_number() over (partition by product_id order by _loaded_at desc) = 1
 -- QUALIFY = WHERE for window functions
 -- SQL doesn't allow window functions in WHERE.
 -- if we dont use we have to write another cte for latest recoreds then do where rnk=1 
+-- The Snowflake Trick (Fixed):
